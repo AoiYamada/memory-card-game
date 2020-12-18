@@ -2,27 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
     <title>Memory Card Game</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.25.0/ramda.min.js"></script>
-  </head>
-  <body>
     <style>
       :root {
-        font-size: 18px;
+        font-size: 13px;
         font-family: "Arial";
+        --star: #fff000;
         --text-primary: #fdc094;
         --text-secondary: #ff9190;
         --bg-primary: #0b0723;
         --bg-secondary: #120c6e;
         --bg-tertiary: #5e72eb;
-        --transition-speed-fast: 1s;
-        --transition-speed-medium: 5s;
-        --transition-speed-slow: 10s;
+        --bg-tertiary-dark: #7586ee;
+        --transition-speed-fast: 0.5s;
+        --transition-speed-medium: 1s;
+        --transition-speed-slow: 3s;
       }
 
       *,
@@ -32,6 +34,8 @@
         padding: 0;
         box-sizing: inherit;
         color: var(--text-primary);
+        user-select: none;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
       }
 
       html,
@@ -69,7 +73,7 @@
         width: 100%;
       }
 
-      #score {
+      .score {
         height: 5rem;
         flex-shrink: 0;
         display: flex;
@@ -77,45 +81,45 @@
         align-items: center;
       }
 
-      #score .unit {
+      .score .unit {
         font-size: 1rem;
       }
 
-      #score > .score-box {
+      .score > .score-box {
         flex: 1;
         height: 3rem;
         line-height: 3rem;
-        font-size: 2.5rem;
+        font-size: 3rem;
         padding: 0.5rem;
       }
 
-      #score > .score-box:not(:first-child) {
+      .score > .score-box:not(:first-child) {
         text-align: right;
       }
 
-      #difficulties {
+      .difficulties {
         display: flex;
         flex-direction: row;
         align-items: center;
       }
 
-      #difficulties > li {
+      .difficulties > li {
         flex: 1;
         list-style: none;
         display: inline-block;
       }
 
-      #difficulties > li > i::before {
-        color: #fff000;
+      .difficulties > li > i::before {
+        color: var(--star);
         cursor: pointer;
       }
 
-      #refresh > i::before {
+      .refresh > i::before {
         color: var(--text-secondary);
         cursor: pointer;
       }
 
-      #board {
+      .board {
         flex: auto;
         border-radius: 1rem;
         margin-bottom: 1rem;
@@ -136,7 +140,7 @@
         align-items: center;
       }
 
-      #board > .card-row {
+      .board > .card-row {
         width: 100%;
         padding: 0.5rem;
         flex: 1;
@@ -145,7 +149,7 @@
         align-items: center;
       }
 
-      #board > .card-row > .card {
+      .card {
         flex: 1;
         list-style: none;
         height: 100%;
@@ -155,12 +159,11 @@
         font-size: 3rem;
         cursor: pointer;
         box-shadow: var(--text-primary);
-
         background-color: transparent;
         perspective: 1000px;
       }
 
-      #board > .card-row > .card > .card-inner {
+      .card > .card-inner {
         position: relative;
         width: 100%;
         height: 100%;
@@ -170,32 +173,32 @@
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
       }
 
-      #board > .card-row > .card > .card-inner > .card-front > i,
-      #board > .card-row > .card > .card-inner > .card-back > i {
+      .card > .card-inner > .card-front > i,
+      .card > .card-inner > .card-back > i {
         margin: auto;
       }
 
-      #board > .card-row > .card > .card-inner > .card-front > i::before,
-      #board > .card-row > .card > .card-inner > .card-back > i::before {
+      .card > .card-inner > .card-front > i::before,
+      .card > .card-inner > .card-back > i::before {
         color: white;
         text-shadow: 0 0 0.5rem white;
       }
 
-      #board > .card-row > .card > .card-inner > .card-front > i::before {
-        color: #fff000;
+      .card > .card-inner > .card-front > i::before {
+        color: var(--star);
       }
 
-      #board > .card-row > .card > .card-inner > .card-front {
+      .card > .card-inner > .card-front {
         background: var(--bg-secondary);
       }
 
-      #board > .card-row > .card > .card-inner > .card-back {
+      .card > .card-inner > .card-back {
         background: var(--bg-secondary);
         transform: rotateY(180deg);
       }
 
-      #board > .card-row > .card > .card-inner > .card-front,
-      #board > .card-row > .card > .card-inner > .card-back {
+      .card > .card-inner > .card-front,
+      .card > .card-inner > .card-back {
         border: 1px solid #ffffff;
         border-radius: 1rem;
         display: flex;
@@ -208,8 +211,15 @@
         backface-visibility: hidden;
       }
 
-      #board > .card-row > .card-opened > .card-inner {
+      .card-opened > .card-inner {
         transform: rotateY(180deg);
+      }
+
+      .card-paired > .card-inner > .card-back {
+        border-color: var(--star);
+        background-color: var(--bg-tertiary);
+        animation: BorderLighting var(--transition-speed-fast) ease;
+        animation-iteration-count: 2;
       }
 
       @-webkit-keyframes GradientAnimation {
@@ -247,13 +257,60 @@
           background-position: 0% 51%;
         }
       }
+
+      @-webkit-keyframes BorderLighting {
+        0% {
+          border-color: var(--star);
+          background-color: var(--bg-tertiary);
+        }
+        50% {
+          border-color: var(--text-primary);
+          background-color: var(--bg-tertiary-dark);
+        }
+        100% {
+          border-color: var(--star);
+          background-color: var(--bg-tertiary);
+        }
+      }
+
+      @-moz-keyframes BorderLighting {
+        0% {
+          border-color: var(--star);
+          background-color: var(--bg-tertiary);
+        }
+        50% {
+          border-color: var(--text-primary);
+          background-color: var(--bg-tertiary-dark);
+        }
+        100% {
+          border-color: var(--star);
+          background-color: var(--bg-tertiary);
+        }
+      }
+
+      @keyframes BorderLighting {
+        0% {
+          border-color: var(--star);
+          background-color: var(--bg-tertiary);
+        }
+        50% {
+          border-color: var(--text-primary);
+          background-color: var(--bg-tertiary-dark);
+        }
+        100% {
+          border-color: var(--star);
+          background-color: var(--bg-tertiary);
+        }
+      }
     </style>
+  </head>
+  <body>
     <header>
       <h1>Memory Card Game</h1>
     </header>
     <main>
-      <section id="score">
-        <ul id="difficulties" class="score-box">
+      <section class="score">
+        <ul class="difficulties score-box">
           <li>
             <i id="difficulty-1" class="fa fa-star" aria-hidden="true"></i>
           </li>
@@ -261,196 +318,217 @@
             <i id="difficulty-2" class="fa fa-star-o" aria-hidden="true"></i>
           </li>
         </ul>
-        <div id="move" class="score-box">
+        <div class="move score-box">
           <span id="move-counter">0</span><span class="unit"> moves</span>
         </div>
-        <div id="time" class="score-box">
+        <div class="time score-box">
           <span id="time-counter">0</span><span class="unit"> s</span>
         </div>
-        <div id="refresh" class="score-box">
-          <i id="refresh-btn" class="fa fa-refresh"></i>
+        <div class="refresh score-box">
+          <i id="refresh-btn" class="refresh-btn fa fa-refresh"></i>
         </div>
       </section>
-      <section id="board"></section>
+      <section class="board"></section>
     </main>
-    <script>
-      const boardDom = document.getElementById("board");
-      // const difficulty1Dom = document.getElementById("difficulty-1");
-      const difficulty2Dom = document.getElementById("difficulty-2");
-      const moveCounterDom = document.getElementById("move-counter");
-      const timeCounterDom = document.getElementById("time-counter");
+    <footer>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/ramda/0.25.0/ramda.min.js"></script>
+      <script>
+        const [boardDom] = document.getElementsByClassName("board");
+        const difficulty2Dom = document.getElementById("difficulty-2");
+        const moveCounterDom = document.getElementById("move-counter");
+        const timeCounterDom = document.getElementById("time-counter");
 
-      const rawCards = [
-        "fa-user",
-        "fa-bell",
-        "fa-bicycle",
-        "fa-bug",
-        "fa-car",
-        "fa-bolt",
-        "fa-asterisk",
-        "fa-balance-scale",
-        "fa-bathtub",
-        "fa-binoculars",
-        "fa-cog",
-        "fa-cloud",
-        "fa-coffee",
-        "fa-cube",
-        "fa-diamond",
-        "fa-envelope",
-        "fa-hand-spock-o",
-        "fa-key",
-      ];
+        const rawCards = [
+          "fa-user",
+          "fa-bell",
+          "fa-bicycle",
+          "fa-bug",
+          "fa-car",
+          "fa-bolt",
+          "fa-asterisk",
+          "fa-balance-scale",
+          "fa-bathtub",
+          "fa-binoculars",
+          "fa-cog",
+          "fa-cloud",
+          "fa-coffee",
+          "fa-cube",
+          "fa-diamond",
+          "fa-envelope",
+          "fa-hand-spock-o",
+          "fa-key",
+        ];
 
-      class Game {
-        constructor(rawCards, boardDom, moveCounterDom, timeCounterDom) {
-          this.rawCards = rawCards;
-          this.boardDom = boardDom;
-          this.moveCounterDom = moveCounterDom;
-          this.timeCounterDom = timeCounterDom;
+        class Game {
+          constructor(rawCards, boardDom, moveCounterDom, timeCounterDom) {
+            this.rawCards = rawCards;
+            this.boardDom = boardDom;
+            this.moveCounterDom = moveCounterDom;
+            this.timeCounterDom = timeCounterDom;
 
-          this.difficulty = 1;
-          this.reset();
-        }
+            this.difficulty = 1;
+            this.reset();
+          }
 
-        get isEnd() {
-          return this.cardPairNum === this.matchedPairNum;
-        }
+          get isEnd() {
+            return this.cardPairNum === this.matchedPairNum;
+          }
 
-        openCard(cardDom) {
-          if (this.selectedCards.length < 2) {
+          openCard(cardDom) {
             this.startTimer();
+            
+            if (cardDom.classList.contains('card-opened')) {
+              return;
+            }
+            
+            if (this.selectedCards.length >= 2) {
+              this.closeSelectedCards();
+            }
 
-            if (this.selectedCards[0] !== cardDom) {
-              cardDom.classList.add("card-opened");
-              this.selectedCards.push(cardDom);
+            cardDom.classList.add("card-opened");
+            this.selectedCards.push(cardDom);
 
-              if (this.selectedCards.length === 2) {
-                this.move += 1;
+            if (this.selectedCards.length !== 2) {
+              return;
+            }
 
-                const [firstCard, secondCard] = this.selectedCards.map(
-                  (selectedCardDom) =>
-                    selectedCardDom.querySelector(".card-back i").classList[1]
-                );
+            this.move += 1;
 
-                if (firstCard !== secondCard) {
-                  setTimeout(() => this.closeSelectedCards(), 1000);
-                } else {
-                  this.matchedPairNum += 1;
-                  this.clearSelectedCards();
+            const [firstCard, secondCard] = this.selectedCards.map(
+              (selectedCardDom) =>
+                selectedCardDom.querySelector(".card-back i").classList[1]
+            );
 
-                  if (this.isEnd) {
-                    this.stopTimer();
-                  }
-                }
-              }
+            if (firstCard !== secondCard) {
+              this.closeCardSchedule = setTimeout(() => this.closeSelectedCards(), 800);
+              return;
+            }
+
+            this.matchedPairNum += 1;
+            this.selectedCards.map(this.lightUpCard);
+            this.clearSelectedCards();
+
+            if (this.isEnd) {
+              this.stopTimer();
             }
           }
-        }
 
-        closeSelectedCards() {
-          for (const cardDom of this.selectedCards) {
-            cardDom.classList.remove("card-opened");
+          lightUpCard(cardDom) {
+            cardDom.classList.add("card-paired");
           }
 
-          this.clearSelectedCards();
-        }
+          closeSelectedCards() {
+            if (this.closeCardSchedule) {
+              clearTimeout(this.closeCardSchedule);
+              this.closeCardSchedule = null;
+            }
+            
+            for (const cardDom of this.selectedCards) {
+              cardDom.classList.remove("card-opened");
+            }
 
-        clearSelectedCards() {
-          this.selectedCards = [];
-        }
-
-        updateTimeUsed() {
-          this.timeUsed = Math.round((Date.now() - this.startTime) / 1000);
-        }
-
-        startTimer() {
-          if (!this.timer) {
-            this.startTime = Date.now();
-            this.timer = setInterval(() => {
-              this.updateTimeUsed();
-              this.updateScore();
-            }, 100);
+            this.clearSelectedCards();
           }
-        }
 
-        stopTimer() {
-          if (this.timer) {
-            clearInterval(this.timer);
+          clearSelectedCards() {
+            this.selectedCards = [];
           }
-        }
 
-        reset() {
-          this.stopTimer();
-          const rowNum = (1 + this.difficulty) * 2;
+          updateTimeUsed() {
+            this.timeUsed = Math.round((Date.now() - this.startTime) / 1000);
+          }
 
-          this.cardPairNum = rowNum ** 2 / 2;
-          this.matchedPairNum = 0;
-          this.rowNum = rowNum;
-          this.move = 0;
-          this.timeUsed = 0;
-          this.startTime = 0;
-          this.timer = 0;
-          this.cards = R.pipe(
-            R.slice(0, this.cardPairNum),
-            (cards) => R.concat(cards, cards),
-            (cards) => cards.sort(() => Math.random() - 0.5),
-            R.splitEvery(rowNum)
-          )(this.rawCards);
-          this.selectedCards = [];
+          startTimer() {
+            if (!this.timer) {
+              this.startTime = Date.now();
+              this.timer = setInterval(() => {
+                this.updateTimeUsed();
+                this.updateScore();
+              }, 100);
+            }
+          }
 
-          this.clearBoard();
-          this.generateBoard();
-          this.updateScore();
-        }
+          stopTimer() {
+            if (this.timer) {
+              clearInterval(this.timer);
+            }
+          }
 
-        updateScore() {
-          this.moveCounterDom.innerHTML = this.move;
-          this.timeCounterDom.innerHTML = this.timeUsed;
-        }
+          reset() {
+            this.stopTimer();
+            const rowNum = (1 + this.difficulty) * 2;
 
-        clearBoard() {
-          // also clear all listeners
-          this.boardDom.innerHTML = "";
-        }
+            this.cardPairNum = rowNum ** 2 / 2;
+            this.matchedPairNum = 0;
+            this.rowNum = rowNum;
+            this.move = 0;
+            this.timeUsed = 0;
+            this.startTime = 0;
+            this.timer = 0;
+            this.cards = R.pipe(
+              R.slice(0, this.cardPairNum),
+              (cards) => R.concat(cards, cards),
+              (cards) => cards.sort(() => Math.random() - 0.5),
+              R.splitEvery(rowNum)
+            )(this.rawCards);
+            this.selectedCards = [];
+            this.closeCardSchedule = null;
 
-        generateBoard() {
-          this.boardDom.innerHTML = R.map(
-            (rowIcons) => Game.generateRowDom(rowIcons),
-            this.cards
-          ).join("");
-        }
+            this.clearBoard();
+            this.generateBoard();
+            this.updateScore();
+          }
 
-        static generateCardDom(contentIcon) {
-          return `
-            <li class="card">
-              <div class="card-inner">
-                <div class="card-front">
-                  <i class="fa fa-star" aria-hidden="true"></i>
+          updateScore() {
+            this.moveCounterDom.innerHTML = this.move;
+            this.timeCounterDom.innerHTML = this.timeUsed;
+          }
+
+          clearBoard() {
+            this.boardDom.innerHTML = "";
+          }
+
+          generateBoard() {
+            this.boardDom.innerHTML = R.map(
+              Game.generateRowDom,
+              this.cards
+            ).join("");
+          }
+
+          static generateCardDom(contentIcon) {
+            return `
+              <li class="card">
+                <div class="card-inner">
+                  <div class="card-front">
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                  </div>
+                  <div class="card-back">
+                    <i class="fa ${contentIcon}" aria-hidden="true"></i>
+                  </div>
                 </div>
-                <div class="card-back">
-                  <i class="fa ${contentIcon}" aria-hidden="true"></i>
-                </div>
-              </div>
-            </li>
-          `;
+              </li>
+            `;
+          }
+
+          static generateRowDom(rowIcons) {
+            return `
+              <ul class="card-row">
+                ${R.map(Game.generateCardDom, rowIcons).join("")}
+              </ul>
+            `;
+          }
         }
 
-        static generateRowDom(rowIcons) {
-          return `
-            <ul class="card-row">
-              ${R.map(
-                (contentIcon) => Game.generateCardDom(contentIcon),
-                rowIcons
-              ).join("")}
-            </ul>
-          `;
-        }
-      }
+        const game = new Game(
+          rawCards,
+          boardDom,
+          moveCounterDom,
+          timeCounterDom
+        );
 
-      const game = new Game(rawCards, boardDom, moveCounterDom, timeCounterDom);
+        document.addEventListener("click", function (e) {
+          if (!e.target) return;
 
-      document.addEventListener("click", function (e) {
-        if (e.target) {
           switch (e.target.id) {
             case "difficulty-1":
               difficulty2Dom.classList.remove("fa-star");
@@ -470,11 +548,11 @@
             default:
               const currentCardDom = e.target.closest(".card");
               if (currentCardDom) {
-                const x = game.openCard(currentCardDom);
+                game.openCard(currentCardDom);
               }
           }
-        }
-      });
-    </script>
+        });
+      </script>
+    </footer>
   </body>
 </html>
